@@ -1,0 +1,45 @@
+blueprint:
+  name: PIR paired Light
+  description: PIR triggers light on and off
+  domain: automation
+  input:
+    pir_id:
+      name: Motion Entity ID
+      description: entity_id of motion(PIR) sensor
+      selector:
+        target:
+          entity:
+            domain: binary_sensor
+            device_class: motion
+    light_id:
+      name: Light Entity ID
+      description: entity_id of light
+      selector:
+        target:
+          entity:
+            domain: light
+    off_delay:
+      name: Delay After No Motion
+      description: Keep light for X seconds after no motion
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: seconds
+
+trigger:
+  - platform: state
+    entity_id: !input pir_id
+    from: "on"
+    to: "off"
+    for:
+      seconds: !input off_delay
+  - platform: state
+    entity_id: !input pir_id
+    from: "off"
+    to: "on"
+
+action:
+  service: >
+    light.turn_{{ trigger.to_state.state }}
+  entity_id: !input light_id
